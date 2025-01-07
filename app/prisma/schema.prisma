@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  password String
+  profile Profile?
+  created_at DateTime @default(now())
+}
+
+model Profile {
+  id Int @id @default(autoincrement())
+  username String @unique
+  image_id String?
+  profile_description String?
+  user User @relation(fields: [user_id], references: [id])
+  user_id Int @unique
+  posts Post[]
+  comments Comment[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+  text String
+  image_id String
+  user_profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  profile_id Int
+  comments Comment[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("posts")
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+  text String
+  profile_id Int
+  post_id Int
+  user_profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  
+  @@map("comments")
+}
