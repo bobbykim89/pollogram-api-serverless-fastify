@@ -6,6 +6,7 @@
   },
   "scripts": {
     "dev:local": "dotenv -e .env -- npm  --prefix ./app run dev",
+    "dev:local:watch": "dotenv -e .env -- npm --prefix ./app run dev:watch",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",

@@ -18,6 +18,8 @@ model User {
   email String @unique
   password String
   profile Profile?
+  active Boolean @default(true)
+  role String @default("USER")
   created_at DateTime @default(now())
 }
 
@@ -30,9 +32,12 @@ model Profile {
   user_id Int @unique
   posts Post[]
   comments Comment[]
+  following Follow[] @relation("following")
+  followed_by Follow[] @relation("followed_by")
+  liked_posts PostLike[]
+  liked_comments CommentLike[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-
   @@map("profiles")
 }
 
@@ -43,6 +48,7 @@ model Post {
   user_profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
   profile_id Int
   comments Comment[]
+  liked_by PostLike[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -56,7 +62,35 @@ model Comment {
   post_id Int
   user_profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
   post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  liked_by CommentLike[]
   created_at DateTime @default(now())
   
   @@map("comments")
+}
+
+model Follow {
+  followed_by_id Int
+  following_id Int
+  followed_by Profile @relation("followed_by", fields: [followed_by_id], references: [id], onDelete: Cascade)
+  following Profile @relation("following", fields: [following_id], references: [id], onDelete: Cascade)
+
+  @@id([following_id, followed_by_id])
+}
+
+model PostLike {
+  profile_id Int
+  post_id Int
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  liked_post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@id([profile_id, post_id])
+}
+
+model CommentLike {
+  profile_id Int
+  comment_id Int
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  liked_comment Comment @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+
+  @@id([profile_id, comment_id])
 }
