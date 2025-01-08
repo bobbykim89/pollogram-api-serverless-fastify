@@ -1,0 +1,13 @@
+services:
+  local-db:
+    image: postgres:latest
+    ports:
+      - 5555:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: fastify
+    networks:
+      - pollogram-fastify
+networks:
+  pollogram-fastify:

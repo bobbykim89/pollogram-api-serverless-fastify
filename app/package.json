@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node ./src/index.ts",
     "dev:watch": "nodemon ./src/index.ts",
-    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:create": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy"
   },
   "keywords": [],
@@ -16,11 +16,16 @@
   "dependencies": {
     "@fastify/aws-lambda": "^5.0.0",
     "@prisma/client": "^6.1.0",
+    "bcryptjs": "^2.4.3",
     "fastify": "^5.2.1",
+    "fastify-type-provider-zod": "^4.0.2",
+    "jsonwebtoken": "^9.0.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.5",
     "@types/nodemon": "^1.19.6",
     "nodemon": "^3.1.9",

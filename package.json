@@ -7,6 +7,11 @@
   "scripts": {
     "dev:local": "dotenv -e .env -- npm  --prefix ./app run dev",
     "dev:local:watch": "dotenv -e .env -- npm --prefix ./app run dev:watch",
+    "db:local:rm": "docker compose rm local-db -s -f -v",
+    "db:local:up": "docker compose up local-db -d",
+    "db:local:restart": "dotenv -e .env -- npm run db:local:rm && npm run db:local:up && npm --prefix ./app run db:migrate:deploy",
+    "db:migrate:create": "dotenv -e .env -- npm --prefix ./app run db:migrate:create",
+    "db:migrate:deploy": "dotenv -e .env -- npm --prefix ./app run db:migrate:deploy",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",

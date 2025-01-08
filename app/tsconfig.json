@@ -1,5 +1,12 @@
 {
   "extends": "@tsconfig/node20/tsconfig.json",
-  "include": ["src/**/*.ts"],
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/types/index.d.ts"],
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }
