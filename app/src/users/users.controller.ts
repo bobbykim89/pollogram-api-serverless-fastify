@@ -27,7 +27,22 @@ export class UserController {
       .route({
         method: 'GET',
         url: '/',
-        handler: (req, res) => this.userService.getPollitoPollito(req, res),
+        preHandler: [this.useAuth.checkAuth],
+        handler: async (req, res) => {
+          if (!req.user) {
+            res.code(401).send({ message: 'Unauthorized' })
+            return
+          }
+          const { statusCode, data, error } =
+            await this.userService.getCurrentUser(req.user)
+          if (error) {
+            res.code(statusCode).send({
+              message: error,
+            })
+            return
+          }
+          res.code(statusCode).send(data)
+        },
       })
       .route<{ Params: { id: string } }>({
         method: 'GET',
@@ -66,7 +81,7 @@ export class UserController {
         preHandler: [this.useAuth.checkAuth],
         handler: this.userService.decodeToken,
       })
-      .route({
+      .route<{ Body: SignupUserInput }>({
         method: 'POST',
         url: '/signup',
         handler: async (req, res) => {
