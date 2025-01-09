@@ -15,6 +15,8 @@
   "description": "a fastify api for pollogram api to be mounted on AWS Lambda",
   "dependencies": {
     "@fastify/aws-lambda": "^5.0.0",
+    "@fastify/swagger": "^9.4.0",
+    "@fastify/swagger-ui": "^5.2.0",
     "@prisma/client": "^6.1.0",
     "bcryptjs": "^2.4.3",
     "fastify": "^5.2.1",

@@ -1,7 +1,11 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { profileListResponseSchema, profileDetailResponseSchema } from './dto'
+import {
+  profileListResponseSchema,
+  profileDetailResponseSchema,
+  profileUsernameUpdateInputSchema,
+} from './dto'
 import { responseErrorSchema } from '../common/dto'
 import { ProfileService } from './profile.service'
 import { UseAuth, UseRes } from '../util'
@@ -54,6 +58,28 @@ export class ProfileController {
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.getCurrentUserProfile(req.user!)
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'PUT',
+        url: '/current-user/username',
+        schema: {
+          body: profileUsernameUpdateInputSchema,
+          response: {
+            204: profileDetailResponseSchema,
+            404: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        preHandler: [this.useAuth.checkAuth],
+        handler: async (req, res) => {
+          const { statusCode, data, error } =
+            await this.profileService.updateUsername(req.body, req.user!)
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
