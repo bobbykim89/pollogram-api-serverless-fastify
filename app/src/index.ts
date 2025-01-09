@@ -1,6 +1,12 @@
 import fastify, { type FastifyReply } from 'fastify'
+import {
+  serializerCompiler,
+  validatorCompiler,
+} from 'fastify-type-provider-zod'
 import awsLambdaHandler from '@fastify/aws-lambda'
-import { userController } from './users/users.module'
+import { userModule } from './users/users.module'
+import { authModule } from './auth/auth.module'
+import { profileModule } from './profile/profile.module'
 
 const STAGE = process.env.STAGE
 const NODE_ENV = process.env.NODE_ENV
@@ -10,6 +16,8 @@ const app = fastify({
 })
 
 app
+  .setValidatorCompiler(validatorCompiler)
+  .setSerializerCompiler(serializerCompiler)
   .get('/', (req, res: FastifyReply) => {
     res.send({
       message: 'Hello world with pollito!',
@@ -17,13 +25,9 @@ app
       stage: STAGE,
     })
   })
-  .get('/hello', (req, res: FastifyReply) => {
-    res.send({ message: 'Pollito says hello! PIO!' })
-  })
-  .get('/goodbye', (req, res: FastifyReply) => {
-    res.send({ message: 'Good bye pollito, see you tomorrow!' })
-  })
-  .register(userController.setUserRoute, { prefix: 'api/user' })
+  .register(userModule.setRoute, { prefix: 'api/user' })
+  .register(authModule.setRoute, { prefix: 'api/auth' })
+  .register(profileModule.setRoute, { prefix: 'api/profile' })
 
 if (NODE_ENV !== 'production') {
   app.listen({ host: 'localhost', port: 3000 }, (err, address) => {

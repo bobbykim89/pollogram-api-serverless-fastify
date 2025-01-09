@@ -1,21 +1,21 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import {
-  signupUserInputSchema,
-  signupUserResponseSchema,
-  pwUpdateInputSchema,
-  pwUpdateResponseSchema,
+  authInputSchema,
+  authResponseSchema,
+  currentUserResponseSchema,
 } from './dto'
 import { responseErrorSchema } from '../common/dto'
-import { UserService } from './users.service'
+import { AuthService } from './auth.service'
 import { UseAuth, UseRes } from '../util'
 
-export class UserController {
-  private userService: UserService
+export class AuthController {
+  private authService: AuthService
   private useAuth: UseAuth
   private useRes: UseRes
+
   constructor() {
-    this.userService = new UserService()
+    this.authService = new AuthService()
     this.useAuth = new UseAuth()
     this.useRes = new UseRes()
   }
@@ -23,21 +23,19 @@ export class UserController {
     app
       .withTypeProvider<ZodTypeProvider>()
       .route({
-        method: 'POST',
-        url: '/signup',
+        method: 'GET',
+        url: '/',
         schema: {
-          body: signupUserInputSchema,
           response: {
-            201: signupUserResponseSchema,
-            400: responseErrorSchema,
+            200: currentUserResponseSchema,
+            404: responseErrorSchema,
             500: responseErrorSchema,
           },
         },
+        preHandler: [this.useAuth.checkAuth],
         handler: async (req, res) => {
-          // validate body
-          const { statusCode, data, error } = await this.userService.signupUser(
-            req.body
-          )
+          const { statusCode, data, error } =
+            await this.authService.getCurrentUser(req.user!)
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
@@ -46,21 +44,20 @@ export class UserController {
         },
       })
       .route({
-        method: 'PUT',
-        url: '/change-password',
+        method: 'POST',
+        url: '/login',
         schema: {
-          body: pwUpdateInputSchema,
+          body: authInputSchema,
           response: {
-            204: pwUpdateResponseSchema,
-            404: responseErrorSchema,
+            201: authResponseSchema,
             403: responseErrorSchema,
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
         handler: async (req, res) => {
-          const { statusCode, data, error } =
-            await this.userService.updatePassword(req.body, req.user!)
+          const { statusCode, data, error } = await this.authService.loginUser(
+            req.body
+          )
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,

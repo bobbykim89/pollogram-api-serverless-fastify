@@ -1,13 +1,11 @@
-import type { FastifyRequest, FastifyReply } from 'fastify'
-import {
-  polloSchema,
-  type PolloSchemaType,
-  type SignupUserInput,
-  type SignupUserResponse,
-  type AuthInput,
+import type {
+  SignupUserInput,
+  SignupUserResponse,
+  PwUpdateInput,
+  PwUpdateResponse,
 } from './dto'
 import type { ServiceResponse } from '../types'
-import { PrismaClient, type User } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { UseAuth } from '../util'
 import bcrypt from 'bcryptjs'
 
@@ -19,79 +17,6 @@ export class UserService {
     this.useAuth = new UseAuth()
   }
 
-  public getPollitoPollito = async (req: FastifyRequest, res: FastifyReply) => {
-    res.code(200).send({ message: 'Pollito pollito' })
-  }
-
-  public getPolloId = async (
-    req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply
-  ) => {
-    const { id } = req.params
-    res.code(200).send({
-      message: `id is ${id}`,
-    })
-  }
-  public postPollitoInfo = async (
-    req: FastifyRequest<{ Params: { id: string }; Body: PolloSchemaType }>,
-    res: FastifyReply
-  ) => {
-    const { id } = req.params
-    const { name, age } = polloSchema.parse(req.body)
-    res.send({
-      message: `Name is ${name} and ${age} years old`,
-      id,
-    })
-  }
-  public getRandomPollos = async (dto: SignupUserInput, id: string) => {
-    const { email, password, username } = dto
-    if (username === 'manguito') {
-      throw new Error('pollito!')
-    }
-    return {
-      email,
-      password,
-      username,
-      param_id: id,
-    }
-  }
-  public getAllUsersList = async (req: FastifyRequest, res: FastifyReply) => {
-    const users = await this.prisma.user.findMany({
-      include: {
-        profile: true,
-      },
-    })
-    res.code(200).send({ users })
-  }
-  public getCurrentUser = async (
-    payload: Record<string, number>
-  ): Promise<ServiceResponse<Omit<User, 'password'>>> => {
-    try {
-      const user = await this.prisma.user.findUnique({
-        where: {
-          id: payload.id,
-        },
-        omit: {
-          password: true,
-        },
-      })
-      if (!user) {
-        return {
-          statusCode: 404,
-          error: 'Not found',
-        }
-      }
-      return {
-        statusCode: 200,
-        data: user,
-      }
-    } catch (error) {
-      return {
-        statusCode: 500,
-        error: 'Internal Server Error',
-      }
-    }
-  }
   public signupUser = async (
     dto: SignupUserInput
   ): Promise<ServiceResponse<SignupUserResponse>> => {
@@ -141,35 +66,36 @@ export class UserService {
       }
     }
   }
-  public loginUser = async (
-    dto: AuthInput
-  ): Promise<ServiceResponse<SignupUserResponse>> => {
+  public updatePassword = async (
+    dto: PwUpdateInput,
+    payload: Record<string, number>
+  ): Promise<ServiceResponse<PwUpdateResponse>> => {
     try {
-      const { email, password } = dto
       const user = await this.prisma.user.findUnique({
-        where: {
-          email,
-        },
+        where: { id: payload.id },
       })
+      const { currentPassword, newPassword } = dto
       if (!user) {
         return {
-          statusCode: 403,
-          error: 'Validation error',
+          statusCode: 404,
+          error: 'Not found',
         }
       }
-      const isMatch = await bcrypt.compare(password, user.password)
+      const isMatch = await bcrypt.compare(currentPassword, user.password)
       if (!isMatch) {
         return {
           statusCode: 403,
           error: 'Validation error',
         }
       }
-      const accessToken = this.useAuth.signToken({ id: user.id })
+      const hashedNewPw = await this.useAuth.hashPassword(newPassword)
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashedNewPw },
+      })
       return {
-        statusCode: 201,
-        data: {
-          access_token: `Bearer ${accessToken}`,
-        },
+        statusCode: 204,
+        data: { message: 'Updated password successfully.' },
       }
     } catch (error) {
       return {
@@ -177,19 +103,5 @@ export class UserService {
         error: 'Internal Server Error',
       }
     }
-  }
-  public createToken = () => {
-    const str = 'pio pio'
-    const payload = {
-      id: str,
-    }
-    const token = this.useAuth.signToken(payload)
-    return {
-      access_token: `Bearer ${token}`,
-    }
-  }
-  public decodeToken = (req: FastifyRequest) => {
-    const usr = req.user
-    return { ...usr }
   }
 }

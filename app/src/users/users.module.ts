@@ -1,3 +1,3 @@
 import { UserController } from './users.controller'
 
-export const userController = new UserController()
+export const userModule = new UserController()
