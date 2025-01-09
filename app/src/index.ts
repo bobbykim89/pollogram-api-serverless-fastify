@@ -2,8 +2,11 @@ import fastify, { type FastifyReply } from 'fastify'
 import {
   serializerCompiler,
   validatorCompiler,
+  jsonSchemaTransform,
 } from 'fastify-type-provider-zod'
 import awsLambdaHandler from '@fastify/aws-lambda'
+import fastifySwagger from '@fastify/swagger'
+import fastifySwaggerUi from '@fastify/swagger-ui'
 import { userModule } from './users/users.module'
 import { authModule } from './auth/auth.module'
 import { profileModule } from './profile/profile.module'
@@ -25,6 +28,17 @@ app
       stage: STAGE,
     })
   })
+  .register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Pollogram API (Fastify)',
+        description: 'Pollogram API backend built on Fastify',
+        version: '1.0.0',
+      },
+    },
+    transform: jsonSchemaTransform,
+  })
+  .register(fastifySwaggerUi, { routePrefix: '/doc' })
   .register(userModule.setRoute, { prefix: 'api/user' })
   .register(authModule.setRoute, { prefix: 'api/auth' })
   .register(profileModule.setRoute, { prefix: 'api/profile' })
