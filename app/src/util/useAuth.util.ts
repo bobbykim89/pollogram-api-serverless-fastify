@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
-import { UseConfig } from './useConfig.util'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import { UseConfig } from './useConfig.util'
 
 export class UseAuth {
   private config: UseConfig

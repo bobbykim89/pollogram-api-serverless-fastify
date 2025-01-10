@@ -39,8 +39,8 @@ model Profile {
   user_id Int @unique
   posts Post[]
   comments Comment[]
-  following Follow[] @relation("following")
-  followed_by Follow[] @relation("followed_by")
+  following Follow[] @relation("followed_by")
+  followed_by Follow[] @relation("following")
   liked_posts PostLike[]
   liked_comments CommentLike[]
   created_at DateTime @default(now())

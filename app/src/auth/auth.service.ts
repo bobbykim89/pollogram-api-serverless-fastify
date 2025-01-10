@@ -25,12 +25,7 @@ export class AuthService {
           password: true,
         },
       })
-      if (!user) {
-        return {
-          statusCode: 404,
-          error: 'Not found',
-        }
-      }
+      if (!user) return { statusCode: 404, error: 'Not found' }
       return {
         statusCode: 200,
         data: user,
@@ -52,19 +47,9 @@ export class AuthService {
           email,
         },
       })
-      if (!user) {
-        return {
-          statusCode: 403,
-          error: 'Validation error',
-        }
-      }
+      if (!user) return { statusCode: 403, error: 'Validation error' }
       const isMatch = await bcrypt.compare(password, user.password)
-      if (!isMatch) {
-        return {
-          statusCode: 403,
-          error: 'Validation error',
-        }
-      }
+      if (!isMatch) return { statusCode: 403, error: 'Validation error' }
       const accessToken = this.useAuth.signToken({ id: user.id })
       return {
         statusCode: 201,

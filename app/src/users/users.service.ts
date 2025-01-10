@@ -32,12 +32,8 @@ export class UserService {
           username,
         },
       })
-      if (user || profile) {
-        return {
-          statusCode: 400,
-          error: 'Email or username is already used',
-        }
-      }
+      if (user || profile)
+        return { statusCode: 400, error: 'Email or username is already used' }
       const hashedPassword = await this.useAuth.hashPassword(password)
       user = await this.prisma.user.create({
         data: {
@@ -75,19 +71,9 @@ export class UserService {
         where: { id: payload.id },
       })
       const { currentPassword, newPassword } = dto
-      if (!user) {
-        return {
-          statusCode: 404,
-          error: 'Not found',
-        }
-      }
+      if (!user) return { statusCode: 404, error: 'Not found' }
       const isMatch = await bcrypt.compare(currentPassword, user.password)
-      if (!isMatch) {
-        return {
-          statusCode: 403,
-          error: 'Validation error',
-        }
-      }
+      if (!isMatch) return { statusCode: 403, error: 'Validation error' }
       const hashedNewPw = await this.useAuth.hashPassword(newPassword)
       await this.prisma.user.update({
         where: { id: user.id },
