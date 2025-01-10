@@ -127,4 +127,90 @@ export class ProfileService {
       }
     }
   }
+  public updateProfileImage = async () => {}
+  public followUser = async (
+    payload: Record<string, number>,
+    id: string
+  ): Promise<ServiceResponse<Profile>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findUnique({
+        where: { user_id: payload.id },
+      })
+      if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
+      const targetUserProfile = await this.prisma.profile.findFirst({
+        where: { id: parseInt(id) },
+      })
+      if (!targetUserProfile) return { statusCode: 404, error: 'Not found' }
+      await this.prisma.follow.create({
+        data: {
+          followed_by_id: currentUserProfile.id,
+          following_id: targetUserProfile.id,
+        },
+      })
+      const updatedProfile = await this.prisma.profile.findUnique({
+        where: { user_id: payload.id },
+        include: {
+          posts: true,
+          followed_by: true,
+          following: true,
+          liked_posts: true,
+          liked_comments: true,
+        },
+      })
+      if (!updatedProfile) return { statusCode: 400, error: 'Bad request' }
+
+      return {
+        statusCode: 201,
+        data: updatedProfile,
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
+  public unfollowUser = async (
+    payload: Record<string, number>,
+    id: string
+  ): Promise<ServiceResponse<Profile>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findUnique({
+        where: { user_id: payload.id },
+      })
+      if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
+      const targetUserProfile = await this.prisma.profile.findFirst({
+        where: { id: parseInt(id) },
+      })
+      if (!targetUserProfile) return { statusCode: 404, error: 'Not found' }
+      await this.prisma.follow.delete({
+        where: {
+          following_id_followed_by_id: {
+            followed_by_id: currentUserProfile.id,
+            following_id: targetUserProfile.id,
+          },
+        },
+      })
+      const updatedProfile = await this.prisma.profile.findUnique({
+        where: { user_id: payload.id },
+        include: {
+          posts: true,
+          followed_by: true,
+          following: true,
+          liked_posts: true,
+          liked_comments: true,
+        },
+      })
+      if (!updatedProfile) return { statusCode: 400, error: 'Bad request' }
+      return {
+        statusCode: 200,
+        data: updatedProfile,
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
 }

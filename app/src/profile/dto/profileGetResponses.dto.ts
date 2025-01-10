@@ -15,8 +15,8 @@ export const profileListResponseSchema = z.array(profileResponseSchema)
 export const followObjectSchema = z.object({
   followed_by_id: z.number(),
   following_id: z.number(),
-  followed_by_profile: profileResponseSchema,
-  following_profile: profileResponseSchema,
+  // followed_by_profile: profileResponseSchema,
+  // following_profile: profileResponseSchema,
 })
 
 export const profileDetailResponseSchema = z.object({

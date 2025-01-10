@@ -7,6 +7,7 @@ import {
 import awsLambdaHandler from '@fastify/aws-lambda'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
+import fastifyMultipart from '@fastify/multipart'
 import { userModule } from './users/users.module'
 import { authModule } from './auth/auth.module'
 import { profileModule } from './profile/profile.module'
@@ -39,6 +40,12 @@ app
     transform: jsonSchemaTransform,
   })
   .register(fastifySwaggerUi, { routePrefix: '/doc' })
+  .register(fastifyMultipart, {
+    limits: {
+      fileSize: 1024 * 1024 * 10,
+      files: 1,
+    },
+  })
   .register(userModule.setRoute, { prefix: 'api/user' })
   .register(authModule.setRoute, { prefix: 'api/auth' })
   .register(profileModule.setRoute, { prefix: 'api/profile' })

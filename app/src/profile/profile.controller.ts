@@ -111,5 +111,51 @@ export class ProfileController {
           })
         },
       })
+      .route({
+        method: 'GET',
+        url: '/:id/follow',
+        schema: {
+          params: z.object({
+            id: z.string(),
+          }),
+          response: {
+            201: profileDetailResponseSchema,
+            404: responseErrorSchema,
+            400: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        preHandler: [this.useAuth.checkAuth],
+        handler: async (req, res) => {
+          const { statusCode, data, error } =
+            await this.profileService.followUser(req.user!, req.params.id)
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'DELETE',
+        url: '/:id/unfollow',
+        schema: {
+          params: z.object({
+            id: z.string(),
+          }),
+          response: {
+            200: profileDetailResponseSchema,
+            404: responseErrorSchema,
+            400: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        preHandler: [this.useAuth.checkAuth],
+        handler: async (req, res) => {
+          const { statusCode, data, error } =
+            await this.profileService.unfollowUser(req.user!, req.params.id)
+          this.useRes.sendDataOrError(res, { statusCode, data, error })
+        },
+      })
   }
 }
