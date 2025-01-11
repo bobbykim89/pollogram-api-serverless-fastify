@@ -6,7 +6,7 @@ import {
   profileDetailResponseSchema,
   profileUsernameUpdateInputSchema,
 } from './dto'
-import { responseErrorSchema } from '../common/dto'
+import { responseErrorSchema, multipartImageInputSchema } from '../common/dto'
 import { ProfileService } from './profile.service'
 import { UseAuth, UseRes } from '../util'
 
@@ -80,6 +80,32 @@ export class ProfileController {
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.updateUsername(req.body, req.user!)
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'PUT',
+        url: '/current-user/profile-image',
+        schema: {
+          body: z.object({
+            image: multipartImageInputSchema,
+          }),
+          200: profileDetailResponseSchema,
+          400: responseErrorSchema,
+          404: responseErrorSchema,
+          500: responseErrorSchema,
+        },
+        preHandler: [this.useAuth.checkAuth],
+        handler: async (req, res) => {
+          const { statusCode, data, error } =
+            await this.profileService.updateProfileImage(
+              req.body.image,
+              req.user!
+            )
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
