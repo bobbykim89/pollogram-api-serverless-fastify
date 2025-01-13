@@ -29,4 +29,19 @@ export class PostService {
       }
     }
   }
+  public getPostDetail = async (id: string): Promise<ServiceResponse<Post>> => {
+    try {
+      const currentPost = await this.prisma.post.findFirst({
+        where: { id: parseInt(id) },
+        include: { comments: true, liked_by: true },
+      })
+      if (!currentPost) return { statusCode: 404, error: 'Not found' }
+      return { statusCode: 200, data: currentPost }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
 }
