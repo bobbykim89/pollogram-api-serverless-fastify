@@ -26,6 +26,7 @@ export class UserController {
         method: 'POST',
         url: '/signup',
         schema: {
+          tags: ['Users'],
           body: signupUserInputSchema,
           response: {
             201: signupUserResponseSchema,
@@ -49,6 +50,7 @@ export class UserController {
         method: 'PUT',
         url: '/change-password',
         schema: {
+          tags: ['Users'],
           body: pwUpdateInputSchema,
           response: {
             204: pwUpdateResponseSchema,

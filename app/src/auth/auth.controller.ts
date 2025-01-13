@@ -26,6 +26,7 @@ export class AuthController {
         method: 'GET',
         url: '/',
         schema: {
+          tags: ['Auth'],
           response: {
             200: currentUserResponseSchema,
             404: responseErrorSchema,
@@ -47,6 +48,7 @@ export class AuthController {
         method: 'POST',
         url: '/login',
         schema: {
+          tags: ['Auth'],
           body: authInputSchema,
           response: {
             201: authResponseSchema,

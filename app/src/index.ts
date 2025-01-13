@@ -8,9 +8,11 @@ import awsLambdaHandler from '@fastify/aws-lambda'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import fastifyMultipart from '@fastify/multipart'
+import fastifyAuth from '@fastify/auth'
 import { userModule } from './users/users.module'
 import { authModule } from './auth/auth.module'
 import { profileModule } from './profile/profile.module'
+import { postModule } from './posts/posts.module'
 
 const STAGE = process.env.STAGE
 const NODE_ENV = process.env.NODE_ENV
@@ -36,19 +38,50 @@ app
         description: 'Pollogram API backend built on Fastify',
         version: '1.0.0',
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'Bearer ',
+          },
+          // apiKey: {
+          //   name: 'authorization',
+          //   type: 'http',
+          //   in: 'header',
+          // },
+        },
+      },
+      tags: [
+        { name: 'Users', description: 'User route' },
+        { name: 'Auth', description: 'Auth route' },
+        { name: 'Profiles', description: 'Profiles route' },
+        { name: 'Posts', description: 'Posts route' },
+        { name: 'Comments', description: 'Comments route' },
+      ],
     },
     transform: jsonSchemaTransform,
   })
-  .register(fastifySwaggerUi, { routePrefix: '/doc' })
+  .register(fastifySwaggerUi, {
+    routePrefix: '/doc',
+    staticCSP: true,
+    transformStaticCSP: (header) => header,
+    transformSpecification: (swaggerObject, req, res) => {
+      return swaggerObject
+    },
+    transformSpecificationClone: true,
+  })
   .register(fastifyMultipart, {
     limits: {
       fileSize: 1024 * 1024 * 10,
       files: 1,
     },
   })
+  .register(fastifyAuth)
   .register(userModule.setRoute, { prefix: 'api/user' })
   .register(authModule.setRoute, { prefix: 'api/auth' })
   .register(profileModule.setRoute, { prefix: 'api/profile' })
+  .register(postModule.setRoute, { prefix: '/api/post' })
 
 if (NODE_ENV !== 'production') {
   app.listen({ host: 'localhost', port: 3000 }, (err, address) => {
