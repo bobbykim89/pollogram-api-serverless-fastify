@@ -6,9 +6,21 @@ import {
   profileDetailResponseSchema,
   profileUsernameUpdateInputSchema,
 } from './dto'
-import { responseErrorSchema, multipartImageInputSchema } from '../common/dto'
+import {
+  responseErrorSchema,
+  multipartImageInputSchema,
+  requestAuthHeaderSchema,
+} from '../common/dto'
 import { ProfileService } from './profile.service'
 import { UseAuth, UseRes } from '../util'
+
+const headersJsonSchema = {
+  type: 'object',
+  properties: {
+    authorization: { type: 'string' },
+  },
+  required: ['authorization'],
+}
 
 export class ProfileController {
   private profileService: ProfileService
@@ -27,13 +39,17 @@ export class ProfileController {
         method: 'GET',
         url: '/',
         schema: {
+          tags: ['Profiles'],
+          headers: requestAuthHeaderSchema,
           response: {
             200: profileListResponseSchema,
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        // preHandler: [this.useAuth.checkAuth],
+        preHandler: app.auth([this.useAuth.checkAuth]),
         handler: async (_, res) => {
+          console.log('auth header', _.headers.authorization)
           const { statusCode, data, error } =
             await this.profileService.getProfileList()
 
@@ -48,13 +64,18 @@ export class ProfileController {
         method: 'GET',
         url: '/current-user',
         schema: {
+          tags: ['Profiles'],
+          headers: requestAuthHeaderSchema,
           response: {
             200: profileDetailResponseSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        preHandler: app.auth(
+          [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
+          { relation: 'and' }
+        ),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.getCurrentUserProfile(req.user!)
@@ -69,6 +90,8 @@ export class ProfileController {
         method: 'PUT',
         url: '/current-user/username',
         schema: {
+          tags: ['Profiles'],
+          headers: requestAuthHeaderSchema,
           body: profileUsernameUpdateInputSchema,
           response: {
             204: profileDetailResponseSchema,
@@ -91,6 +114,8 @@ export class ProfileController {
         method: 'PUT',
         url: '/current-user/profile-image',
         schema: {
+          tags: ['Profiles'],
+          headers: requestAuthHeaderSchema,
           body: z.object({
             image: multipartImageInputSchema,
           }),
@@ -120,6 +145,8 @@ export class ProfileController {
           params: z.object({
             id: z.string(),
           }),
+          tags: ['Profiles'],
+          headers: requestAuthHeaderSchema,
           response: {
             200: profileDetailResponseSchema,
             404: responseErrorSchema,
@@ -141,9 +168,11 @@ export class ProfileController {
         method: 'GET',
         url: '/:id/follow',
         schema: {
+          tags: ['Profiles'],
           params: z.object({
             id: z.string(),
           }),
+          headers: requestAuthHeaderSchema,
           response: {
             201: profileDetailResponseSchema,
             404: responseErrorSchema,
@@ -166,9 +195,11 @@ export class ProfileController {
         method: 'DELETE',
         url: '/:id/unfollow',
         schema: {
+          tags: ['Profiles'],
           params: z.object({
             id: z.string(),
           }),
+          headers: requestAuthHeaderSchema,
           response: {
             200: profileDetailResponseSchema,
             404: responseErrorSchema,

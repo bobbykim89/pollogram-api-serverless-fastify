@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "a fastify api for pollogram api to be mounted on AWS Lambda",
   "dependencies": {
+    "@fastify/auth": "^5.0.2",
     "@fastify/aws-lambda": "^5.0.0",
     "@fastify/multipart": "^9.0.1",
     "@fastify/swagger": "^9.4.0",
