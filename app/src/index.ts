@@ -77,7 +77,7 @@ app
       files: 1,
     },
   })
-  .register(fastifyAuth)
+  .register(fastifyAuth, { defaultRelation: 'and' })
   .register(userModule.setRoute, { prefix: 'api/user' })
   .register(authModule.setRoute, { prefix: 'api/auth' })
   .register(profileModule.setRoute, { prefix: 'api/profile' })
