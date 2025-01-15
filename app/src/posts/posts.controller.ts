@@ -60,10 +60,14 @@ export class PostController {
             500: responseErrorSchema,
           },
         },
-        preHandler: app.auth(
+        onRequest: app.auth(
           [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
           { relation: 'and' }
         ),
+        // preHandler: app.auth(
+        //   [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
+        //   { relation: 'and' }
+        // ),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.postService.createNewPost(req.body, req.currentUser!)
@@ -91,6 +95,36 @@ export class PostController {
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.postService.getPostDetail(req.params.id)
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'DELETE',
+        url: '/:id',
+        schema: {
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          params: z.object({ id: z.string() }),
+          response: {
+            200: z.object({ message: z.string() }),
+            400: responseErrorSchema,
+            401: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
+        handler: async (req, res) => {
+          const { statusCode, data, error } = await this.postService.deletePost(
+            req.params.id,
+            req.currentUser!
+          )
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,

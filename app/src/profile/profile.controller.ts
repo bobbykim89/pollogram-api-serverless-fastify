@@ -14,14 +14,6 @@ import {
 import { ProfileService } from './profile.service'
 import { UseAuth, UseRes } from '../util'
 
-const headersJsonSchema = {
-  type: 'object',
-  properties: {
-    authorization: { type: 'string' },
-  },
-  required: ['authorization'],
-}
-
 export class ProfileController {
   private profileService: ProfileService
   private useAuth: UseAuth
@@ -47,7 +39,8 @@ export class ProfileController {
           },
         },
         // preHandler: [this.useAuth.checkAuth],
-        preHandler: app.auth([this.useAuth.checkAuth]),
+        // preHandler: app.auth([this.useAuth.checkAuth]),
+        onRequest: app.auth([this.useAuth.checkAuth]),
         handler: async (_, res) => {
           console.log('auth header', _.headers.authorization)
           const { statusCode, data, error } =
@@ -72,10 +65,14 @@ export class ProfileController {
             500: responseErrorSchema,
           },
         },
-        preHandler: app.auth(
-          [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
-          { relation: 'and' }
-        ),
+        // preHandler: app.auth(
+        //   [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
+        //   { relation: 'and' }
+        // ),
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.getCurrentUserProfile(req.user!)
@@ -99,7 +96,8 @@ export class ProfileController {
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        // preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([this.useAuth.checkAuth]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.updateUsername(req.body, req.user!)
@@ -124,7 +122,8 @@ export class ProfileController {
           404: responseErrorSchema,
           500: responseErrorSchema,
         },
-        preHandler: [this.useAuth.checkAuth],
+        // preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([this.useAuth.checkAuth]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.updateProfileImage(
@@ -153,7 +152,8 @@ export class ProfileController {
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        // preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([this.useAuth.checkAuth]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.getProfileById(req.params.id)
@@ -180,7 +180,8 @@ export class ProfileController {
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        // preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([this.useAuth.checkAuth]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.followUser(req.user!, req.params.id)
@@ -207,7 +208,8 @@ export class ProfileController {
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        // preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([this.useAuth.checkAuth]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.profileService.unfollowUser(req.user!, req.params.id)

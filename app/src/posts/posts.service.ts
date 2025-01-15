@@ -82,4 +82,28 @@ export class PostService {
       }
     }
   }
+  public deletePost = async (
+    id: string,
+    user: Omit<User, 'password'>
+  ): Promise<ServiceResponse<{ message: string }>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findFirst({
+        where: { user_id: user.id },
+      })
+      const targetPost = await this.prisma.post.findFirst({
+        where: { id: parseInt(id) },
+      })
+      if (!targetPost) return { statusCode: 400, error: 'Bad request' }
+      if (targetPost.profile_id !== currentUserProfile?.id)
+        return { statusCode: 401, error: 'Unauthorized' }
+      await this.prisma.post.delete({ where: { id: targetPost.id } })
+      await this.useMultipartData.deleteCloudinaryImage(targetPost.image_id)
+      return { statusCode: 200, data: { message: 'Delete successful' } }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
 }
