@@ -132,5 +132,65 @@ export class PostController {
           })
         },
       })
+      .route({
+        method: 'POST',
+        url: '/:id/like',
+        schema: {
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          params: z.object({ id: z.string() }),
+          response: {
+            201: postDetailResponseSchema,
+            400: responseErrorSchema,
+            401: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
+        handler: async (req, res) => {
+          const { statusCode, error, data } = await this.postService.likePost(
+            req.params.id,
+            req.currentUser!
+          )
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'DELETE',
+        url: '/:id/unlike',
+        schema: {
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          params: z.object({ id: z.string() }),
+          response: {
+            200: postDetailResponseSchema,
+            400: responseErrorSchema,
+            401: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
+        handler: async (req, res) => {
+          const { statusCode, error, data } = await this.postService.unlikePost(
+            req.params.id,
+            req.currentUser!
+          )
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
   }
 }

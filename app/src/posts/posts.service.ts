@@ -106,4 +106,73 @@ export class PostService {
       }
     }
   }
+  public likePost = async (
+    postId: string,
+    user: Omit<User, 'password'>
+  ): Promise<ServiceResponse<Post>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findFirst({
+        where: { user_id: user.id },
+      })
+      const targetPost = await this.prisma.post.findFirst({
+        where: { id: parseInt(postId) },
+      })
+      if (!targetPost) return { statusCode: 400, error: 'Bad request' }
+      if (targetPost.profile_id !== currentUserProfile?.id)
+        return { statusCode: 401, error: 'Unauthorized' }
+      await this.prisma.postLike.create({
+        data: { post_id: targetPost.id, profile_id: currentUserProfile.id },
+      })
+      const updatedPost = await this.prisma.post.findFirst({
+        where: { id: targetPost.id },
+        include: { comments: true, liked_by: true },
+      })
+      return {
+        statusCode: 201,
+        data: updatedPost!,
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
+  public unlikePost = async (
+    postId: string,
+    user: Omit<User, 'password'>
+  ): Promise<ServiceResponse<Post>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findFirst({
+        where: { user_id: user.id },
+      })
+      const targetPost = await this.prisma.post.findFirst({
+        where: { id: parseInt(postId) },
+      })
+      if (!targetPost) return { statusCode: 400, error: 'Bad request' }
+      if (targetPost.profile_id !== currentUserProfile?.id)
+        return { statusCode: 401, error: 'Unauthorized' }
+      await this.prisma.postLike.delete({
+        where: {
+          profile_id_post_id: {
+            post_id: targetPost.id,
+            profile_id: currentUserProfile.id,
+          },
+        },
+      })
+      const updatedPost = await this.prisma.post.findFirst({
+        where: { id: targetPost.id },
+        include: { comments: true, liked_by: true },
+      })
+      return {
+        statusCode: 200,
+        data: updatedPost!,
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
 }
