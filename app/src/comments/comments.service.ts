@@ -114,4 +114,40 @@ export class CommentService {
       }
     }
   }
+  public unlikeComment = async (
+    commentId: string,
+    user: Omit<User, 'password'>
+  ): Promise<ServiceResponse<Comment>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findFirst({
+        where: { user_id: user.id },
+      })
+      const targetComment = await this.prisma.comment.findFirst({
+        where: { id: parseInt(commentId) },
+      })
+      if (!targetComment) return { statusCode: 400, error: 'Bad request' }
+      if (targetComment.profile_id !== currentUserProfile?.id)
+        return { statusCode: 401, error: 'Unauthorized' }
+      await this.prisma.commentLike.delete({
+        where: {
+          profile_id_comment_id: {
+            comment_id: targetComment.id,
+            profile_id: currentUserProfile.id,
+          },
+        },
+      })
+      const updatedComment = await this.prisma.comment.findFirst({
+        where: { id: targetComment.id },
+      })
+      return {
+        statusCode: 202,
+        data: updatedComment!,
+      }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
 }
