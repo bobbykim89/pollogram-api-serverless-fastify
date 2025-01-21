@@ -1,12 +1,5 @@
 import type { ServiceResponse } from '../types'
-import {
-  PrismaClient,
-  type Post,
-  type User,
-  type Comment,
-} from '@prisma/client'
-import type {} from './dto'
-import { UseMultipartData } from '../util'
+import { PrismaClient, type User, type Comment } from '@prisma/client'
 
 export class CommentService {
   private prisma: PrismaClient

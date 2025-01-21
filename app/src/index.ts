@@ -13,6 +13,7 @@ import { userModule } from './users/users.module'
 import { authModule } from './auth/auth.module'
 import { profileModule } from './profile/profile.module'
 import { postModule } from './posts/posts.module'
+import { commentModule } from './comments/comments.module'
 
 const STAGE = process.env.STAGE
 const NODE_ENV = process.env.NODE_ENV
@@ -82,6 +83,7 @@ app
   .register(authModule.setRoute, { prefix: 'api/auth' })
   .register(profileModule.setRoute, { prefix: 'api/profile' })
   .register(postModule.setRoute, { prefix: '/api/post' })
+  .register(commentModule.setRoute, { prefix: '/api/comment' })
 
 if (NODE_ENV !== 'production') {
   app.listen({ host: 'localhost', port: 3000 }, (err, address) => {
