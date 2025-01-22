@@ -1,5 +1,5 @@
 import type { ServiceResponse } from '../types'
-import { PrismaClient, type Profile } from '@prisma/client'
+import { PrismaClient, type Profile, type User } from '@prisma/client'
 import type { ProfileUsernameUpdateInput } from './dto'
 import { type MultipartImageInput } from '../common/dto'
 import { UseMultipartData } from '../util'
@@ -27,20 +27,11 @@ export class ProfileService {
     }
   }
   public getCurrentUserProfile = async (
-    payload: Record<string, number>
+    user: Omit<User, 'password'>
   ): Promise<ServiceResponse<Profile>> => {
     try {
-      const currentUser = await this.prisma.user.findUnique({
-        where: { id: payload.id },
-      })
-      if (!currentUser) {
-        return {
-          statusCode: 404,
-          error: 'Not found',
-        }
-      }
       const currentUserProfile = await this.prisma.profile.findUnique({
-        where: { user_id: currentUser.id },
+        where: { user_id: user.id },
         include: {
           posts: true,
           followed_by: true,
@@ -99,17 +90,12 @@ export class ProfileService {
   }
   public updateUsername = async (
     body: ProfileUsernameUpdateInput,
-    user: Record<string, number>
+    user: Omit<User, 'password'>
   ): Promise<ServiceResponse<Profile>> => {
     try {
       const { username } = body
-      const currentUser = await this.prisma.user.findUnique({
-        where: { id: user.id },
-        omit: { password: true },
-      })
-      if (!currentUser) return { statusCode: 404, error: 'Not found' }
       const currentUserProfile = await this.prisma.profile.findUnique({
-        where: { user_id: currentUser.id },
+        where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
       const updatedProfile = await this.prisma.profile.update({
@@ -133,11 +119,11 @@ export class ProfileService {
   }
   public updateProfileImage = async (
     dto: MultipartImageInput,
-    payload: Record<string, number>
+    user: Omit<User, 'password'>
   ): Promise<ServiceResponse<Profile>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
-        where: { user_id: payload.id },
+        where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
       const cloudinaryRes = await this.useMultipartData.uploadCloudinary(
@@ -174,12 +160,12 @@ export class ProfileService {
     }
   }
   public followUser = async (
-    payload: Record<string, number>,
+    user: Omit<User, 'password'>,
     id: string
   ): Promise<ServiceResponse<Profile>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
-        where: { user_id: payload.id },
+        where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
       const targetUserProfile = await this.prisma.profile.findFirst({
@@ -193,7 +179,7 @@ export class ProfileService {
         },
       })
       const updatedProfile = await this.prisma.profile.findUnique({
-        where: { user_id: payload.id },
+        where: { user_id: user.id },
         include: {
           posts: true,
           followed_by: true,
@@ -216,12 +202,12 @@ export class ProfileService {
     }
   }
   public unfollowUser = async (
-    payload: Record<string, number>,
+    user: Omit<User, 'password'>,
     id: string
   ): Promise<ServiceResponse<Profile>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
-        where: { user_id: payload.id },
+        where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
       const targetUserProfile = await this.prisma.profile.findFirst({
@@ -237,7 +223,7 @@ export class ProfileService {
         },
       })
       const updatedProfile = await this.prisma.profile.findUnique({
-        where: { user_id: payload.id },
+        where: { user_id: user.id },
         include: {
           posts: true,
           followed_by: true,

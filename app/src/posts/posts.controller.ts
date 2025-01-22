@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { postDetailResponseSchema, postResponseSchema } from './dto'
 import {
   responseErrorSchema,
-  multipartImageInputSchema,
   requestAuthHeaderSchema,
   multipartInputSchema,
 } from '../common/dto'
@@ -35,7 +34,10 @@ export class PostController {
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
         handler: async (_, res) => {
           const { statusCode, data, error } =
             await this.postService.getPostList()
@@ -60,14 +62,10 @@ export class PostController {
             500: responseErrorSchema,
           },
         },
-        onRequest: app.auth(
-          [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
-          { relation: 'and' }
-        ),
-        // preHandler: app.auth(
-        //   [this.useAuth.checkAuth, this.useAuth.checkUserInfo],
-        //   { relation: 'and' }
-        // ),
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.postService.createNewPost(req.body, req.currentUser!)
@@ -91,7 +89,10 @@ export class PostController {
             500: responseErrorSchema,
           },
         },
-        preHandler: [this.useAuth.checkAuth],
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
             await this.postService.getPostDetail(req.params.id)
