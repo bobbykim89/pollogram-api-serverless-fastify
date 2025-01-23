@@ -1,6 +1,9 @@
 import type { ServiceResponse } from '../types'
 import { PrismaClient, type Profile, type User } from '@prisma/client'
-import type { ProfileUsernameUpdateInput } from './dto'
+import type {
+  ProfileUsernameUpdateInput,
+  ProfileDescriptionUpdateInput,
+} from './dto'
 import { type MultipartImageInput } from '../common/dto'
 import { UseMultipartData } from '../util'
 
@@ -110,6 +113,35 @@ export class ProfileService {
         },
       })
       return { statusCode: 204, data: updatedProfile }
+    } catch (error) {
+      return {
+        statusCode: 500,
+        error: 'Internal Server Error',
+      }
+    }
+  }
+  public updateProfileDescription = async (
+    dto: ProfileDescriptionUpdateInput,
+    user: Omit<User, 'password'>
+  ): Promise<ServiceResponse<Profile>> => {
+    try {
+      const currentUserProfile = await this.prisma.profile.findUnique({
+        where: { user_id: user.id },
+      })
+      if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
+      const updatedProfile = await this.prisma.profile.update({
+        where: { id: currentUserProfile.id },
+        data: { profile_description: dto.description },
+        include: {
+          posts: true,
+          followed_by: true,
+          following: true,
+          liked_posts: true,
+          liked_comments: true,
+        },
+      })
+      if (!updatedProfile) return { statusCode: 400, error: 'Bad request' }
+      return { statusCode: 200, data: updatedProfile }
     } catch (error) {
       return {
         statusCode: 500,
