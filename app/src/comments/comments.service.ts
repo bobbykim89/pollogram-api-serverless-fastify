@@ -14,6 +14,7 @@ export class CommentService {
       const commentsList = await this.prisma.comment.findMany({
         where: { post_id: parseInt(postId) },
         orderBy: { created_at: 'desc' },
+        include: { user_profile: true, liked_by: true },
       })
       return {
         statusCode: 200,

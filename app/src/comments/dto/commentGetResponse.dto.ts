@@ -1,14 +1,17 @@
 import { z } from 'zod'
-import { profileResponseSchema } from '../../profile/dto'
-import { postResponseSchema } from '../../posts/dto'
+import {
+  profileResponseSchema,
+  postResponseSchema,
+  commentResponseSchema,
+} from '../../common/dto'
 
-export const commentResponseSchema = z.object({
-  id: z.number(),
-  text: z.string(),
-  profile_id: z.number(),
-  post_id: z.number(),
-  created_at: z.date(),
-})
+// export const commentResponseSchema = z.object({
+//   id: z.number(),
+//   text: z.string(),
+//   profile_id: z.number(),
+//   post_id: z.number(),
+//   created_at: z.date(),
+// })
 
 export const commentLikeObjectSchema = z.object({
   profile_id: z.number(),
@@ -17,7 +20,6 @@ export const commentLikeObjectSchema = z.object({
 
 export const commentDetailResponseSchema = commentResponseSchema.extend({
   user_profile: profileResponseSchema,
-  post: postResponseSchema,
   liked_by: z.array(commentLikeObjectSchema),
 })
 

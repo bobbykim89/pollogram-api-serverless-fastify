@@ -1,10 +1,10 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { commentResponseSchema } from './dto'
-import { responseErrorSchema } from '../common/dto'
+import { responseErrorSchema, commentResponseSchema } from '../common/dto'
 import { CommentService } from './comments.service'
 import { UseAuth, UseRes } from '../util'
+import { commentDetailResponseSchema } from './dto'
 
 export class CommentController {
   private commentService: CommentService
@@ -28,7 +28,7 @@ export class CommentController {
             postId: z.string(),
           }),
           response: {
-            200: z.array(commentResponseSchema),
+            200: z.array(commentDetailResponseSchema),
             500: responseErrorSchema,
           },
         },

@@ -17,10 +17,10 @@
     "test": "jest",
     "cdk": "cdk",
     "cdk:bootstrap": "dotenv -e .env -- cdk bootstrap",
-    "cdk:deploy:prod": "dotenv -e .env -e .env.prod -- cdk deploy",
-    "cdk:destroy:prod": "dotenv -e .env -e .env.prod -- cdk destroy",
-    "cdk:deploy:dev": "dotenv -e .env -e .env.dev -- cdk deploy",
-    "cdk:destroy:dev": "dotenv -e .env -e .env.dev -- cdk destroy"
+    "cdk:deploy:prod": "dotenv -e .env -e .env.prod -- cdk deploy Prod/*",
+    "cdk:destroy:prod": "dotenv -e .env -e .env.prod -- cdk destroy Prod/*",
+    "cdk:deploy:dev": "dotenv -e .env -e .env.dev -- cdk deploy Dev/*",
+    "cdk:destroy:dev": "dotenv -e .env -e .env.dev -- cdk destroy Dev/*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
