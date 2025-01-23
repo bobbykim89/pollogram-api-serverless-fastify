@@ -5,6 +5,7 @@ import {
   profileListResponseSchema,
   profileDetailResponseSchema,
   profileUsernameUpdateInputSchema,
+  profileDescriptionUpdateInputSchema,
 } from './dto'
 import {
   responseErrorSchema,
@@ -108,6 +109,37 @@ export class ProfileController {
       })
       .route({
         method: 'PUT',
+        url: '/current-user/description',
+        schema: {
+          tags: ['Profiles'],
+          headers: requestAuthHeaderSchema,
+          body: profileDescriptionUpdateInputSchema,
+          response: {
+            200: profileDetailResponseSchema,
+            400: responseErrorSchema,
+            404: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
+        handler: async (req, res) => {
+          const { statusCode, data, error } =
+            await this.profileService.updateProfileDescription(
+              req.body,
+              req.currentUser!
+            )
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'PUT',
         url: '/current-user/profile-image',
         schema: {
           tags: ['Profiles'],
@@ -115,10 +147,12 @@ export class ProfileController {
           body: z.object({
             image: multipartImageInputSchema,
           }),
-          200: profileDetailResponseSchema,
-          400: responseErrorSchema,
-          404: responseErrorSchema,
-          500: responseErrorSchema,
+          response: {
+            200: profileDetailResponseSchema,
+            400: responseErrorSchema,
+            404: responseErrorSchema,
+            500: responseErrorSchema,
+          },
         },
         onRequest: app.auth([
           this.useAuth.checkAuth,
