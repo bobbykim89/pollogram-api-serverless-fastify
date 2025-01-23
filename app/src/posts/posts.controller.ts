@@ -1,11 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { postDetailResponseSchema, postResponseSchema } from './dto'
+import { postDetailResponseSchema } from './dto'
 import {
   responseErrorSchema,
   requestAuthHeaderSchema,
   multipartInputSchema,
+  postResponseSchema,
 } from '../common/dto'
 import { PostService } from './posts.service'
 import { UseAuth, UseRes } from '../util'
@@ -30,7 +31,7 @@ export class PostController {
           tags: ['Posts'],
           headers: requestAuthHeaderSchema,
           response: {
-            200: postResponseSchema,
+            200: z.array(postResponseSchema),
             500: responseErrorSchema,
           },
         },
@@ -81,7 +82,6 @@ export class PostController {
         url: '/:id',
         schema: {
           tags: ['Posts'],
-          headers: requestAuthHeaderSchema,
           params: z.object({ id: z.string() }),
           response: {
             200: postDetailResponseSchema,

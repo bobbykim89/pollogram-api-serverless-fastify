@@ -77,6 +77,7 @@ app
       fileSize: 1024 * 1024 * 10,
       files: 1,
     },
+    attachFieldsToBody: true,
   })
   .register(fastifyAuth, { defaultRelation: 'and' })
   .register(userModule.setRoute, { prefix: 'api/user' })

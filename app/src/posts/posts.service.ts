@@ -33,7 +33,7 @@ export class PostService {
     try {
       const currentPost = await this.prisma.post.findFirst({
         where: { id: parseInt(id) },
-        include: { comments: true, liked_by: true },
+        include: { comments: true, liked_by: true, user_profile: true },
       })
       if (!currentPost) return { statusCode: 404, error: 'Not found' }
       return { statusCode: 200, data: currentPost }
@@ -125,7 +125,7 @@ export class PostService {
       })
       const updatedPost = await this.prisma.post.findFirst({
         where: { id: targetPost.id },
-        include: { comments: true, liked_by: true },
+        include: { comments: true, liked_by: true, user_profile: true },
       })
       return {
         statusCode: 201,
@@ -162,7 +162,7 @@ export class PostService {
       })
       const updatedPost = await this.prisma.post.findFirst({
         where: { id: targetPost.id },
-        include: { comments: true, liked_by: true },
+        include: { comments: true, liked_by: true, user_profile: true },
       })
       return {
         statusCode: 200,

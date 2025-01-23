@@ -1,11 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import {
-  authInputSchema,
-  authResponseSchema,
-  currentUserResponseSchema,
-} from './dto'
-import { responseErrorSchema } from '../common/dto'
+import { authInputSchema, authResponseSchema } from './dto'
+import { responseErrorSchema, userResponseSchema } from '../common/dto'
 import { AuthService } from './auth.service'
 import { UseAuth, UseRes } from '../util'
 
@@ -28,7 +24,7 @@ export class AuthController {
         schema: {
           tags: ['Auth'],
           response: {
-            200: currentUserResponseSchema,
+            200: userResponseSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },

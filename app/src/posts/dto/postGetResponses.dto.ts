@@ -1,14 +1,18 @@
 import { z } from 'zod'
-import { profileResponseSchema } from '../../profile/dto'
+import {
+  profileResponseSchema,
+  commentResponseSchema,
+  postResponseSchema,
+} from '../../common/dto'
 
-export const postResponseSchema = z.object({
-  id: z.number(),
-  text: z.string(),
-  image_id: z.string(),
-  profile_id: z.number(),
-  created_at: z.date(),
-  updated_at: z.date(),
-})
+// export const postResponseSchema = z.object({
+//   id: z.number(),
+//   text: z.string(),
+//   image_id: z.string(),
+//   profile_id: z.number(),
+//   created_at: z.date(),
+//   updated_at: z.date(),
+// })
 
 export const postListResponseSchema = z.array(postResponseSchema)
 
@@ -16,11 +20,10 @@ export const postLikeObjectSchema = z.object({
   profile_id: z.number(),
   post_id: z.number(),
 })
-
 export const postDetailResponseSchema = postResponseSchema.extend({
-  userProfile: profileResponseSchema,
+  user_profile: profileResponseSchema,
   // TODO: add proper typedef for comments comments dto's are established.
-  comments: z.array(z.string()),
+  comments: z.array(commentResponseSchema),
   liked_by: z.array(postLikeObjectSchema),
 })
 

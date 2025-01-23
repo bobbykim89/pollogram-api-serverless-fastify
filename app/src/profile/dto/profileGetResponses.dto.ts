@@ -1,38 +1,21 @@
 import { z } from 'zod'
-
-export const profileResponseSchema = z.object({
-  id: z.number(),
-  username: z.string(),
-  image_id: z.union([z.string(), z.null()]),
-  profile_description: z.union([z.string(), z.null()]),
-  user_id: z.number(),
-  created_at: z.date(),
-  updated_at: z.date(),
-})
+import { postLikeObjectSchema } from '../../posts/dto'
+import { commentLikeObjectSchema } from '../../comments/dto'
+import { postResponseSchema, profileResponseSchema } from '../../common/dto'
 
 export const profileListResponseSchema = z.array(profileResponseSchema)
 
 export const followObjectSchema = z.object({
   followed_by_id: z.number(),
   following_id: z.number(),
-  // followed_by_profile: profileResponseSchema,
-  // following_profile: profileResponseSchema,
 })
 
-export const profileDetailResponseSchema = z.object({
-  id: z.number(),
-  username: z.string(),
-  image_id: z.union([z.string(), z.null()]),
-  profile_description: z.union([z.string(), z.null()]),
-  user_id: z.number(),
-  // TODO: update format
+export const profileDetailResponseSchema = profileResponseSchema.extend({
   following: z.array(followObjectSchema),
   followed_by: z.array(followObjectSchema),
-  posts: z.array(z.string()),
-  liked_posts: z.array(z.string()),
-  liked_comments: z.array(z.string()),
-  created_at: z.date(),
-  updated_at: z.date(),
+  posts: z.array(postResponseSchema),
+  liked_posts: z.array(postLikeObjectSchema),
+  liked_comments: z.array(commentLikeObjectSchema),
 })
 
 export type ProfileResponse = z.infer<typeof profileResponseSchema>
