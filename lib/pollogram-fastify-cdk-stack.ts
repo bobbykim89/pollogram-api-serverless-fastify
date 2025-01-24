@@ -8,8 +8,8 @@ export class PollogramFastifyCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    const stage: string = process.env.STAGE || 'prod' // default 'prod'
-    const pollogramApiFn = new NodejsFunction(this, `PollogramAPI${stage}`, {
+    // const stage: string = process.env.STAGE || 'prod' // default 'prod'
+    const pollogramApiFn = new NodejsFunction(this, 'PollogramAPI', {
       runtime: Runtime.NODEJS_20_X,
       entry: 'app/src/index.ts',
       handler: 'handler',
@@ -22,9 +22,9 @@ export class PollogramFastifyCdkStack extends cdk.Stack {
     new LambdaRestApi(this, 'PollogramAPIGateway', {
       handler: pollogramApiFn,
       proxy: true,
-      deployOptions: {
-        stageName: stage,
-      },
+      // deployOptions: {
+      //   stageName: stage,
+      // },
     })
   }
 }

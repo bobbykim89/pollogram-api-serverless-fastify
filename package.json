@@ -5,13 +5,15 @@
     "pollogram-fastify-cdk": "bin/pollogram-fastify-cdk.js"
   },
   "scripts": {
-    "dev:local": "dotenv -e .env -- npm  --prefix ./app run dev",
-    "dev:local:watch": "dotenv -e .env -- npm --prefix ./app run dev:watch",
+    "dev:local": "dotenv -e .env -e .env.dev -- npm  --prefix ./app run dev",
+    "dev:local:watch": "dotenv -e .env -e .env.dev -- npm --prefix ./app run dev:watch",
     "db:local:rm": "docker compose rm local-db -s -f -v",
     "db:local:up": "docker compose up local-db -d",
     "db:local:restart": "dotenv -e .env -- npm run db:local:rm && npm run db:local:up && npm --prefix ./app run db:migrate:deploy",
-    "db:migrate:create": "dotenv -e .env -- npm --prefix ./app run db:migrate:create",
-    "db:migrate:deploy": "dotenv -e .env -- npm --prefix ./app run db:migrate:deploy",
+    "db:prod:migrate:create": "dotenv -e .env -e .env.prod -- npm --prefix ./app run db:migrate:create",
+    "db:prod:migrate:deploy": "dotenv -e .env -e .env.prod -- npm --prefix ./app run db:migrate:deploy",
+    "db:dev:migrate:create": "dotenv -e .env -e .env.dev -- npm --prefix ./app run db:migrate:create",
+    "db:dev:migrate:deploy": "dotenv -e .env -e .env.dev -- npm --prefix ./app run db:migrate:deploy",
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
@@ -20,7 +22,9 @@
     "cdk:deploy:prod": "dotenv -e .env -e .env.prod -- cdk deploy Prod/*",
     "cdk:destroy:prod": "dotenv -e .env -e .env.prod -- cdk destroy Prod/*",
     "cdk:deploy:dev": "dotenv -e .env -e .env.dev -- cdk deploy Dev/*",
-    "cdk:destroy:dev": "dotenv -e .env -e .env.dev -- cdk destroy Dev/*"
+    "cdk:destroy:dev": "dotenv -e .env -e .env.dev -- cdk destroy Dev/*",
+    "ga:deploy:prod": "cdk deploy Prod/*",
+    "ga:deploy:dev": "cdk deploy Dev/*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
