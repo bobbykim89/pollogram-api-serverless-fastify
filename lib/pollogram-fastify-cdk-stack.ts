@@ -15,8 +15,13 @@ export class PollogramFastifyCdkStack extends cdk.Stack {
       handler: 'handler',
       environment: {
         NODE_ENV: 'production',
+        DATABASE_URL: process.env.DATABASE_URL || '',
+        DATABASE_URL_UNPOOLED: process.env.DATABASE_URL_UNPOOLED || '',
       },
       timeout: cdk.Duration.seconds(10),
+      bundling: {
+        nodeModules: ['@prisma/client', 'prisma'],
+      },
     })
 
     new LambdaRestApi(this, 'PollogramAPIGateway', {
