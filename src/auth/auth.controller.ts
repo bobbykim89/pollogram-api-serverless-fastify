@@ -15,7 +15,7 @@ export class AuthController {
     this.useAuth = new UseAuth()
     this.useRes = new UseRes()
   }
-  public setRoute = async (app: FastifyInstance) => {
+  public setRoute = (app: FastifyInstance) => {
     app
       .withTypeProvider<ZodTypeProvider>()
       .route({

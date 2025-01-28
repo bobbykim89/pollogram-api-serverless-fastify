@@ -8,10 +8,10 @@ export class PollogramFastifyCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    // const stage: string = process.env.STAGE || 'prod' // default 'prod'
+    const stage: string = process.env.STAGE || 'prod' // default 'prod'
     const pollogramApiFn = new NodejsFunction(this, 'PollogramAPI', {
       runtime: Runtime.NODEJS_20_X,
-      entry: 'app/src/index.ts',
+      entry: 'src/index.ts',
       handler: 'handler',
       environment: {
         NODE_ENV: 'production',
@@ -20,16 +20,32 @@ export class PollogramFastifyCdkStack extends cdk.Stack {
       },
       timeout: cdk.Duration.seconds(10),
       bundling: {
-        nodeModules: ['@prisma/client', 'prisma'],
+        nodeModules: [],
+        minify: true,
+        commandHooks: {
+          beforeBundling(_inputDir: string, _outputDir: string): string[] {
+            return []
+          },
+          beforeInstall(_inputDir: string, _outputDir: string) {
+            return ['npx prisma generate']
+          },
+          afterBundling(inputDir: string, outputDir: string): string[] {
+            return [
+              `cp ${inputDir}/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node ${outputDir}`,
+              `cp ${inputDir}/prisma/schema.prisma ${outputDir}`,
+            ]
+          },
+        },
+        forceDockerBundling: false,
       },
     })
 
     new LambdaRestApi(this, 'PollogramAPIGateway', {
       handler: pollogramApiFn,
       proxy: true,
-      // deployOptions: {
-      //   stageName: stage,
-      // },
+      deployOptions: {
+        stageName: stage,
+      },
     })
   }
 }

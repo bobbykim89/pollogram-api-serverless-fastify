@@ -1,34 +1,37 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { responseErrorSchema, commentResponseSchema } from '../common/dto'
-import { CommentService } from './comments.service'
+import { postDetailResponseSchema } from './dto'
+import {
+  responseErrorSchema,
+  requestAuthHeaderSchema,
+  multipartInputSchema,
+  postResponseSchema,
+} from '../common/dto'
+import { PostService } from './posts.service'
 import { UseAuth, UseRes } from '../util'
-import { commentDetailResponseSchema } from './dto'
 
-export class CommentController {
-  private commentService: CommentService
+export class PostController {
+  private postService: PostService
   private useAuth: UseAuth
   private useRes: UseRes
 
   constructor() {
-    this.commentService = new CommentService()
+    this.postService = new PostService()
     this.useAuth = new UseAuth()
     this.useRes = new UseRes()
   }
-  public setRoute = async (app: FastifyInstance) => {
+  public setRoute = (app: FastifyInstance) => {
     app
       .withTypeProvider<ZodTypeProvider>()
       .route({
         method: 'GET',
-        url: '/:postId',
+        url: '/',
         schema: {
-          tags: ['Comments'],
-          params: z.object({
-            postId: z.string(),
-          }),
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
           response: {
-            200: z.array(commentDetailResponseSchema),
+            200: z.array(postResponseSchema),
             500: responseErrorSchema,
           },
         },
@@ -36,10 +39,9 @@ export class CommentController {
           this.useAuth.checkAuth,
           this.useAuth.checkUserInfo,
         ]),
-        handler: async (req, res) => {
+        handler: async (_, res) => {
           const { statusCode, data, error } =
-            await this.commentService.listComments(req.params.postId)
-
+            await this.postService.getPostList()
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
@@ -49,17 +51,13 @@ export class CommentController {
       })
       .route({
         method: 'POST',
-        url: '/:postId',
+        url: '/',
         schema: {
-          tags: ['Comments'],
-          params: z.object({
-            postId: z.string(),
-          }),
-          body: z.object({
-            text: z.string(),
-          }),
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          body: multipartInputSchema,
           response: {
-            201: commentResponseSchema,
+            203: postResponseSchema,
             400: responseErrorSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
@@ -71,11 +69,33 @@ export class CommentController {
         ]),
         handler: async (req, res) => {
           const { statusCode, data, error } =
-            await this.commentService.createNewComment(
-              req.params.postId,
-              req.body.text,
-              req.currentUser!
-            )
+            await this.postService.createNewPost(req.body, req.currentUser!)
+          this.useRes.sendDataOrError<typeof data>(res, {
+            statusCode,
+            data,
+            error,
+          })
+        },
+      })
+      .route({
+        method: 'GET',
+        url: '/:id',
+        schema: {
+          tags: ['Posts'],
+          params: z.object({ id: z.string() }),
+          response: {
+            200: postDetailResponseSchema,
+            404: responseErrorSchema,
+            500: responseErrorSchema,
+          },
+        },
+        onRequest: app.auth([
+          this.useAuth.checkAuth,
+          this.useAuth.checkUserInfo,
+        ]),
+        handler: async (req, res) => {
+          const { statusCode, data, error } =
+            await this.postService.getPostDetail(req.params.id)
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
@@ -87,13 +107,13 @@ export class CommentController {
         method: 'DELETE',
         url: '/:id',
         schema: {
-          tags: ['Comments'],
-          params: z.object({
-            id: z.string(),
-          }),
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          params: z.object({ id: z.string() }),
           response: {
-            202: z.object({ message: z.string() }),
-            404: responseErrorSchema,
+            200: z.object({ message: z.string() }),
+            400: responseErrorSchema,
+            401: responseErrorSchema,
             500: responseErrorSchema,
           },
         },
@@ -102,11 +122,10 @@ export class CommentController {
           this.useAuth.checkUserInfo,
         ]),
         handler: async (req, res) => {
-          const { statusCode, data, error } =
-            await this.commentService.deleteComment(
-              req.params.id,
-              req.currentUser!
-            )
+          const { statusCode, data, error } = await this.postService.deletePost(
+            req.params.id,
+            req.currentUser!
+          )
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
@@ -118,12 +137,11 @@ export class CommentController {
         method: 'POST',
         url: '/:id/like',
         schema: {
-          tags: ['Comments'],
-          params: z.object({
-            id: z.string(),
-          }),
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          params: z.object({ id: z.string() }),
           response: {
-            201: commentResponseSchema,
+            201: postDetailResponseSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,
@@ -134,11 +152,10 @@ export class CommentController {
           this.useAuth.checkUserInfo,
         ]),
         handler: async (req, res) => {
-          const { statusCode, data, error } =
-            await this.commentService.likeComment(
-              req.params.id,
-              req.currentUser!
-            )
+          const { statusCode, error, data } = await this.postService.likePost(
+            req.params.id,
+            req.currentUser!
+          )
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
@@ -150,12 +167,11 @@ export class CommentController {
         method: 'DELETE',
         url: '/:id/unlike',
         schema: {
-          tags: ['Comments'],
-          params: z.object({
-            id: z.string(),
-          }),
+          tags: ['Posts'],
+          headers: requestAuthHeaderSchema,
+          params: z.object({ id: z.string() }),
           response: {
-            202: commentResponseSchema,
+            200: postDetailResponseSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,
@@ -166,11 +182,10 @@ export class CommentController {
           this.useAuth.checkUserInfo,
         ]),
         handler: async (req, res) => {
-          const { statusCode, data, error } =
-            await this.commentService.unlikeComment(
-              req.params.id,
-              req.currentUser!
-            )
+          const { statusCode, error, data } = await this.postService.unlikePost(
+            req.params.id,
+            req.currentUser!
+          )
           this.useRes.sendDataOrError<typeof data>(res, {
             statusCode,
             data,
