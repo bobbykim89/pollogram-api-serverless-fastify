@@ -1,7 +1,6 @@
 *.js
-!webpack.config.*
 !jest.config.js
-*.d.ts
+# *.d.ts
 node_modules
 .env*
 reference
