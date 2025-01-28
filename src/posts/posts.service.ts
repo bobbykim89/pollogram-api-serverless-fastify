@@ -1,7 +1,6 @@
 import type { ServiceResponse } from '../types'
 import { PrismaClient, type Post, type User } from '@prisma/client'
-import type {} from './dto'
-import { type MultipartImageInput, type MultipartInput } from '../common/dto'
+import { type MultipartInput, type ResponseMessage } from '../common/dto'
 import { UseMultipartData } from '../util'
 
 export class PostService {
@@ -47,7 +46,7 @@ export class PostService {
   public createNewPost = async (
     dto: MultipartInput,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Post>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
         where: { user_id: user.id },
@@ -63,17 +62,16 @@ export class PostService {
       } = await this.useMultipartData.readFormDataText(dto.content)
       if (contentError)
         return { statusCode: contentStatusCode, error: contentError }
-      const newPost = await this.prisma.post.create({
+      await this.prisma.post.create({
         data: {
           image_id: data?.image_id!,
           text: contentData!,
           profile_id: currentUserProfile.id,
         },
       })
-      if (!newPost) return { statusCode: 400, error: 'Bad request' }
       return {
-        statusCode: 203,
-        data: newPost,
+        statusCode: 201,
+        data: { message: 'Successfully created post.' },
       }
     } catch (error) {
       return {
@@ -85,7 +83,7 @@ export class PostService {
   public deletePost = async (
     id: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<{ message: string }>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
@@ -98,7 +96,7 @@ export class PostService {
         return { statusCode: 401, error: 'Unauthorized' }
       await this.prisma.post.delete({ where: { id: targetPost.id } })
       await this.useMultipartData.deleteCloudinaryImage(targetPost.image_id)
-      return { statusCode: 200, data: { message: 'Delete successful' } }
+      return { statusCode: 204, data: { message: 'Delete successful' } }
     } catch (error) {
       return {
         statusCode: 500,
@@ -109,7 +107,7 @@ export class PostService {
   public likePost = async (
     postId: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Post>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
@@ -123,13 +121,9 @@ export class PostService {
       await this.prisma.postLike.create({
         data: { post_id: targetPost.id, profile_id: currentUserProfile.id },
       })
-      const updatedPost = await this.prisma.post.findFirst({
-        where: { id: targetPost.id },
-        include: { comments: true, liked_by: true, user_profile: true },
-      })
       return {
         statusCode: 201,
-        data: updatedPost!,
+        data: { message: 'Successfully liked the post.' },
       }
     } catch (error) {
       return {
@@ -141,7 +135,7 @@ export class PostService {
   public unlikePost = async (
     postId: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Post>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
@@ -160,13 +154,9 @@ export class PostService {
           },
         },
       })
-      const updatedPost = await this.prisma.post.findFirst({
-        where: { id: targetPost.id },
-        include: { comments: true, liked_by: true, user_profile: true },
-      })
       return {
-        statusCode: 200,
-        data: updatedPost!,
+        statusCode: 204,
+        data: { message: 'Successfully unliked the post' },
       }
     } catch (error) {
       return {
