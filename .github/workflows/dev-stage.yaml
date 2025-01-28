@@ -22,9 +22,9 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
       DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED_DEV }}
     steps:
-      - uses: actions/checkout@4
+      - uses: actions/checkout@v4
       - name: Use Node.js
-        uses: actions/setup-node@4
+        uses: actions/setup-node@v4
         with:
           node-version: '20.14'
           cache: 'npm'
