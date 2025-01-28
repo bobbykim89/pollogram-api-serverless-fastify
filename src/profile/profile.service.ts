@@ -4,7 +4,7 @@ import type {
   ProfileUsernameUpdateInput,
   ProfileDescriptionUpdateInput,
 } from './dto'
-import { type MultipartImageInput } from '../common/dto'
+import { type MultipartImageInput, type ResponseMessage } from '../common/dto'
 import { UseMultipartData } from '../util'
 
 export class ProfileService {
@@ -94,25 +94,21 @@ export class ProfileService {
   public updateUsername = async (
     body: ProfileUsernameUpdateInput,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Profile>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const { username } = body
       const currentUserProfile = await this.prisma.profile.findUnique({
         where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
-      const updatedProfile = await this.prisma.profile.update({
+      await this.prisma.profile.update({
         where: { id: currentUserProfile.id },
         data: { username },
-        include: {
-          posts: true,
-          followed_by: true,
-          following: true,
-          liked_posts: true,
-          liked_comments: true,
-        },
       })
-      return { statusCode: 204, data: updatedProfile }
+      return {
+        statusCode: 204,
+        data: { message: 'Successfully updated profile.' },
+      }
     } catch (error) {
       return {
         statusCode: 500,
@@ -123,25 +119,20 @@ export class ProfileService {
   public updateProfileDescription = async (
     dto: ProfileDescriptionUpdateInput,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Profile>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
         where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
-      const updatedProfile = await this.prisma.profile.update({
+      await this.prisma.profile.update({
         where: { id: currentUserProfile.id },
         data: { profile_description: dto.description },
-        include: {
-          posts: true,
-          followed_by: true,
-          following: true,
-          liked_posts: true,
-          liked_comments: true,
-        },
       })
-      if (!updatedProfile) return { statusCode: 400, error: 'Bad request' }
-      return { statusCode: 200, data: updatedProfile }
+      return {
+        statusCode: 204,
+        data: { message: 'Successfully updated profile.' },
+      }
     } catch (error) {
       return {
         statusCode: 500,
@@ -152,7 +143,7 @@ export class ProfileService {
   public updateProfileImage = async (
     dto: MultipartImageInput,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Profile>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
         where: { user_id: user.id },
@@ -168,21 +159,13 @@ export class ProfileService {
           error: cloudinaryRes.error,
         }
       const { image_id } = cloudinaryRes.data!
-      const updatedUserProfile = await this.prisma.profile.update({
+      await this.prisma.profile.update({
         where: { id: currentUserProfile.id },
         data: { image_id },
-        include: {
-          posts: true,
-          followed_by: true,
-          following: true,
-          liked_posts: true,
-          liked_comments: true,
-        },
       })
-      if (!updatedUserProfile) return { statusCode: 400, error: 'Bad request' }
       return {
-        statusCode: 200,
-        data: updatedUserProfile,
+        statusCode: 204,
+        data: { message: 'Successfully updated profile.' },
       }
     } catch (error) {
       return {
@@ -194,7 +177,7 @@ export class ProfileService {
   public followUser = async (
     user: Omit<User, 'password'>,
     id: string
-  ): Promise<ServiceResponse<Profile>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
         where: { user_id: user.id },
@@ -210,21 +193,10 @@ export class ProfileService {
           following_id: targetUserProfile.id,
         },
       })
-      const updatedProfile = await this.prisma.profile.findUnique({
-        where: { user_id: user.id },
-        include: {
-          posts: true,
-          followed_by: true,
-          following: true,
-          liked_posts: true,
-          liked_comments: true,
-        },
-      })
-      if (!updatedProfile) return { statusCode: 400, error: 'Bad request' }
 
       return {
         statusCode: 201,
-        data: updatedProfile,
+        data: { message: 'Successfully followed user.' },
       }
     } catch (error) {
       return {
@@ -236,7 +208,7 @@ export class ProfileService {
   public unfollowUser = async (
     user: Omit<User, 'password'>,
     id: string
-  ): Promise<ServiceResponse<Profile>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findUnique({
         where: { user_id: user.id },
@@ -254,20 +226,9 @@ export class ProfileService {
           },
         },
       })
-      const updatedProfile = await this.prisma.profile.findUnique({
-        where: { user_id: user.id },
-        include: {
-          posts: true,
-          followed_by: true,
-          following: true,
-          liked_posts: true,
-          liked_comments: true,
-        },
-      })
-      if (!updatedProfile) return { statusCode: 400, error: 'Bad request' }
       return {
-        statusCode: 200,
-        data: updatedProfile,
+        statusCode: 204,
+        data: { message: 'Successfully unfollowed user.' },
       }
     } catch (error) {
       return {

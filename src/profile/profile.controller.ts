@@ -11,6 +11,7 @@ import {
   responseErrorSchema,
   multipartImageInputSchema,
   requestAuthHeaderSchema,
+  responseMessageSchema,
 } from '../common/dto'
 import { ProfileService } from './profile.service'
 import { UseAuth, UseRes } from '../util'
@@ -88,7 +89,7 @@ export class ProfileController {
           headers: requestAuthHeaderSchema,
           body: profileUsernameUpdateInputSchema,
           response: {
-            204: profileDetailResponseSchema,
+            204: responseMessageSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
@@ -115,8 +116,7 @@ export class ProfileController {
           headers: requestAuthHeaderSchema,
           body: profileDescriptionUpdateInputSchema,
           response: {
-            200: profileDetailResponseSchema,
-            400: responseErrorSchema,
+            204: responseMessageSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
@@ -148,8 +148,7 @@ export class ProfileController {
             image: multipartImageInputSchema,
           }),
           response: {
-            200: profileDetailResponseSchema,
-            400: responseErrorSchema,
+            204: responseMessageSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
@@ -210,9 +209,8 @@ export class ProfileController {
           }),
           headers: requestAuthHeaderSchema,
           response: {
-            201: profileDetailResponseSchema,
+            201: responseMessageSchema,
             404: responseErrorSchema,
-            400: responseErrorSchema,
             500: responseErrorSchema,
           },
         },
@@ -243,9 +241,8 @@ export class ProfileController {
           }),
           headers: requestAuthHeaderSchema,
           response: {
-            200: profileDetailResponseSchema,
+            204: responseMessageSchema,
             404: responseErrorSchema,
-            400: responseErrorSchema,
             500: responseErrorSchema,
           },
         },

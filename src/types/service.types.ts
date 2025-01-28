@@ -1,9 +1,3 @@
-// export interface ServiceResponse<T> {
-//   statusCode: number
-//   error?: string
-//   data?: T
-// }
-
 interface ServiceResponseStatus {
   statusCode: number
 }
