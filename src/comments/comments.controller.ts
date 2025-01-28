@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { responseErrorSchema, commentResponseSchema } from '../common/dto'
+import { responseErrorSchema, responseMessageSchema } from '../common/dto'
 import { CommentService } from './comments.service'
 import { UseAuth, UseRes } from '../util'
 import { commentDetailResponseSchema } from './dto'
@@ -59,8 +59,7 @@ export class CommentController {
             text: z.string(),
           }),
           response: {
-            201: commentResponseSchema,
-            400: responseErrorSchema,
+            201: responseMessageSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
@@ -92,7 +91,7 @@ export class CommentController {
             id: z.string(),
           }),
           response: {
-            202: z.object({ message: z.string() }),
+            202: responseMessageSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
@@ -123,7 +122,7 @@ export class CommentController {
             id: z.string(),
           }),
           response: {
-            201: commentResponseSchema,
+            201: responseMessageSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,
@@ -155,7 +154,7 @@ export class CommentController {
             id: z.string(),
           }),
           response: {
-            202: commentResponseSchema,
+            202: responseMessageSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,

@@ -7,6 +7,7 @@ import {
   requestAuthHeaderSchema,
   multipartInputSchema,
   postResponseSchema,
+  responseMessageSchema,
 } from '../common/dto'
 import { PostService } from './posts.service'
 import { UseAuth, UseRes } from '../util'
@@ -57,8 +58,7 @@ export class PostController {
           headers: requestAuthHeaderSchema,
           body: multipartInputSchema,
           response: {
-            203: postResponseSchema,
-            400: responseErrorSchema,
+            201: responseMessageSchema,
             404: responseErrorSchema,
             500: responseErrorSchema,
           },
@@ -111,7 +111,7 @@ export class PostController {
           headers: requestAuthHeaderSchema,
           params: z.object({ id: z.string() }),
           response: {
-            200: z.object({ message: z.string() }),
+            204: responseMessageSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,
@@ -141,7 +141,7 @@ export class PostController {
           headers: requestAuthHeaderSchema,
           params: z.object({ id: z.string() }),
           response: {
-            201: postDetailResponseSchema,
+            201: responseMessageSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,
@@ -171,7 +171,7 @@ export class PostController {
           headers: requestAuthHeaderSchema,
           params: z.object({ id: z.string() }),
           response: {
-            200: postDetailResponseSchema,
+            204: responseMessageSchema,
             400: responseErrorSchema,
             401: responseErrorSchema,
             500: responseErrorSchema,

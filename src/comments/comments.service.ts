@@ -1,5 +1,6 @@
 import type { ServiceResponse } from '../types'
 import { PrismaClient, type User, type Comment } from '@prisma/client'
+import { type ResponseMessage } from '../common/dto'
 
 export class CommentService {
   private prisma: PrismaClient
@@ -31,21 +32,23 @@ export class CommentService {
     postId: string,
     text: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Comment>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
       })
       if (!currentUserProfile) return { statusCode: 404, error: 'Not found' }
-      const newComment = await this.prisma.comment.create({
+      await this.prisma.comment.create({
         data: {
           post_id: parseInt(postId),
           profile_id: currentUserProfile.id,
           text,
         },
       })
-      if (!newComment) return { statusCode: 400, error: 'Bad request' }
-      return { statusCode: 201, data: newComment }
+      return {
+        statusCode: 201,
+        data: { message: 'Successfully created new comment.' },
+      }
     } catch (error) {
       return {
         statusCode: 500,
@@ -56,7 +59,7 @@ export class CommentService {
   public deleteComment = async (
     commentId: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<{ message: string }>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
@@ -77,7 +80,7 @@ export class CommentService {
   public likeComment = async (
     commentId: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Comment>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
@@ -94,12 +97,9 @@ export class CommentService {
           profile_id: currentUserProfile.id,
         },
       })
-      const updatedComment = await this.prisma.comment.findFirst({
-        where: { id: targetComment.id },
-      })
       return {
         statusCode: 201,
-        data: updatedComment!,
+        data: { message: 'Successfully liked comment.' },
       }
     } catch (error) {
       return {
@@ -111,7 +111,7 @@ export class CommentService {
   public unlikeComment = async (
     commentId: string,
     user: Omit<User, 'password'>
-  ): Promise<ServiceResponse<Comment>> => {
+  ): Promise<ServiceResponse<ResponseMessage>> => {
     try {
       const currentUserProfile = await this.prisma.profile.findFirst({
         where: { user_id: user.id },
@@ -130,12 +130,9 @@ export class CommentService {
           },
         },
       })
-      const updatedComment = await this.prisma.comment.findFirst({
-        where: { id: targetComment.id },
-      })
       return {
         statusCode: 202,
-        data: updatedComment!,
+        data: { message: 'Successfully unliked comment.' },
       }
     } catch (error) {
       return {
