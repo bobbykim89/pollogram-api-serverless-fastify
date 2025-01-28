@@ -23,8 +23,8 @@
     "cdk:destroy:prod": "dotenv -e .env -e .env.prod -- cdk destroy Prod/*",
     "cdk:deploy:dev": "dotenv -e .env -e .env.dev -- cdk deploy Dev/*",
     "cdk:destroy:dev": "dotenv -e .env -e .env.dev -- cdk destroy Dev/*",
-    "ga:deploy:prod": "cdk deploy Prod/*",
-    "ga:deploy:dev": "cdk deploy Dev/*"
+    "ga:deploy:prod": "cdk deploy Prod/* --require-approval never",
+    "ga:deploy:dev": "cdk deploy Dev/* --require-approval never"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

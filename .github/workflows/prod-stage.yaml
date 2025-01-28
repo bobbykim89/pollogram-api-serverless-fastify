@@ -1,0 +1,37 @@
+name: Deploy Production App
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      ADMIN_SECRET_PHRASE: ${{ secrets.ADMIN_SECRET_PHRASE }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      AWS_REGION: us-east-2
+      STAGE: prod
+      CLOUDINARY_TARGET_FOLDER: pollogram-api-fastify
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+      DATABASE_URL_UNPOOLED: ${{ secrets.DATABASE_URL_UNPOOLED_PROD }}
+    steps:
+      - uses: actions/checkout@4
+      - name: Use Node.js
+        uses: actions/setup-node@4
+        with:
+          node-version: '20.14'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Deploy
+        run: npm run ga:deploy:prod
