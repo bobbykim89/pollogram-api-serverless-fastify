@@ -1,12 +1,22 @@
 {
   "name": "pollogram-fastify-cdk",
   "version": "0.1.0",
+  "description": "Pollogram-API is a backend API for an Instagram clone project, designed using Fastify and Prisma as ORM. Project is deployed on AWS Lambda using AWS-CDK as its IAS. It provides endpoints to manage users, profiles, posts, and comments.",
+  "author": {
+    "name": "Bobby Kim",
+    "url": "https://www.devbobbykim.com/",
+    "email": "bobby.sihun.kim@gmail.com"
+  },
+  "repository": {
+    "url": "https://github.com/bobbykim89/pollogram-api-serverless-fastify.git",
+    "type": "git"
+  },
   "bin": {
     "pollogram-fastify-cdk": "bin/pollogram-fastify-cdk.js"
   },
   "scripts": {
-    "dev": "dotenv -e .env -e .env.prod -- ts-node ./src/index.ts",
-    "dev:watch": "dotenv -e .env -e .env.prod -- nodemon ./src/index.ts",
+    "dev": "dotenv -e .env -e .env.dev -- ts-node ./src/index.ts",
+    "dev:watch": "dotenv -e .env -e .env.dev -- nodemon ./src/index.ts",
     "prisma:generate": "prisma generate",
     "db:local:rm": "docker compose rm local-db -s -f -v",
     "db:local:up": "docker compose up local-db -d",
